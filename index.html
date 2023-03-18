@@ -11,10 +11,7 @@
   <script>
 
     "use strict";
-
-
-        //var updatePassword;
-       
+  
 
         class AJAXStorage {
 
@@ -123,14 +120,8 @@
         }
 
 
-        var drinkStorage = new AJAXStorage('MARCHIK_DRINKS_STORAGE');
-        // $.ajax({
-        //         url: "https://fe.it-academy.by/AjaxStringStorage2.php", type: 'POST', cache: false, dataType: 'json',
-        //         data: { f: 'READ', n: stringName },
-        //         success: drinkStorage.readReady, error: drinkStorage.errorHandler
-        //     }
-        //     );
-
+        let drinkStorage = new AJAXStorage('MARCHIK_DRINKS_STORAGE');
+        
         function getStringValue(message) {
             let value = prompt(`Введите ${message}:`); //спрашиваем 
             while (true) //проверка на корректность
