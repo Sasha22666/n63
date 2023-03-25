@@ -2,16 +2,21 @@
 <html lang="ru">
 
 <head>
-  <meta charset="utf-8" />
-  <title>Напитки_LOCALSTORAGE</title>
+    <meta charset="utf-8" />
+    <title>Напитки_LOCALSTORAGE</title>
 </head>
 
 <body>
-  <script src="https://fe.it-academy.by/JQ/jquery.js"></script>
-  <script>
 
-    "use strict";
-  
+    <input type="button" id="button1" value="Ввод информации о напитке" onclick="infoDrink()">
+    <input type="button" id="button2" value="Получение информации о напитке" onclick="getInfoDrink()">
+    <input type="button" id="button3" value="Удаление информации о напитке" onclick="deleteInfoDrink()">
+    <input type="button" id="button4" value="Перечень всех напитков" onclick="listDrink()">
+
+    <script src="https://fe.it-academy.by/JQ/jquery.js"></script>
+    <script>
+
+        "use strict";
 
         class AJAXStorage {
 
@@ -22,42 +27,130 @@
                 this.info = {};
                 this.storage = {};
                 this.updatePassword = Math.random();
+
+                this.setstart();
+                $.ajax({
+                    url: this.ajaxHandlerScript,
+                    type: 'POST',
+                    cache: false,
+                    dataType: 'json',
+                    data: { f: 'READ', n: this.stringName },
+                    success: this.readReady,
+                    error: this.errorHandler
+                });
             }
 
-
-
-            readReady=(callresult)=> {
+            readReady = (callresult) => {
                 if (callresult.error != undefined)
                     alert(callresult.error);
                 else {
                     this.info = JSON.parse(callresult.result);
                     this.storage = JSON.parse(callresult.result);
                 }
+                this.setEnd();
             };
 
-            errorHandler=(jqXHR, statusStr, errorStr)=> {
-                alert(statusStr + ' ' + errorStr);
+            setstart() {
+                document.getElementById("button1").disabled = true;
+                document.getElementById("button2").disabled = true;
+                document.getElementById("button3").disabled = true;
+                document.getElementById("button4").disabled = true;
+            }
+
+            setEnd() {
+                document.getElementById("button1").disabled = false;
+                document.getElementById("button2").disabled = false;
+                document.getElementById("button3").disabled = false;
+                document.getElementById("button4").disabled = false;
             }
 
             addValue(key, value) {
                 this.storage[key] = value;
                 this.info = this.storage;
                 this.saveChanges();
-                
-               
+            }
+
+            saveChanges() {
+                this.setstart();
+                $.ajax({
+                    url: this.ajaxHandlerScript,
+                    type: 'POST',
+                    cache: false,
+                    dataType: 'json',
+                    data: {
+                        f: 'LOCKGET',
+                        n: this.stringName,
+                        p: this.updatePassword
+                    },
+                    success: this.lockGetReady,
+                    error: this.errorHandler
+                }
+                );
+            }
+
+            lockGetReady = (callresult) => {
+                if (callresult.error != undefined)
+                    alert(callresult.error);
+                else {
+                    this.info = this.storage;
+                }
+                  $.ajax({
+                    url: this.ajaxHandlerScript,
+                    type: 'POST',
+                    cache: false,
+                    dataType: 'json',
+                    data: {
+                        f: 'UPDATE',
+                        n: this.stringName,
+                        v: JSON.stringify(this.info),
+                        p: this.updatePassword
+                    },
+                    success: this.updateReady,
+                    error: this.errorHandler
+                }
+                );
+
+            }
+
+            updateReady = (callresult) => {
+                 if (callresult.error != undefined)
+                    alert(callresult.error);
+                this.setEnd();
+            }
+
+            getKeys() {
+                this.setstart();
+                $.ajax({
+                    url: this.ajaxHandlerScript,
+                    type: 'POST',
+                    cache: false,
+                    dataType: 'json',
+                    data: {
+                        f: 'READ',
+                        n: this.stringName
+                    },
+                    success: this.readReady,
+                    error: this.errorHandler
+                });
+                return Object.keys(this.storage);
+            }
+
+            errorHandler = (jqXHR, statusStr, errorStr) => {
+                alert(statusStr + ' ' + errorStr);
+                this.setEnd();
             }
 
             getValue(key) {
-             
+
                 if (key in this.storage) {
                     return this.storage[key];
                 }
                 else
                     return undefined;
-                
             }
 
             deleteValue(key) {
+
                 if (key in this.storage) {
                     delete this.storage[key];
                     this.saveChanges();
@@ -66,62 +159,10 @@
                 else
                     return false;
             }
-            getKeys() {
-                $.ajax({
-                    url:  this.ajaxHandlerScript,
-                    type: 'POST',
-                    cache: false,
-                    dataType: 'json',
-                    data: { f: 'READ', n: this.stringName },
-                    success: this.readReady,
-                    error: this.errorHandler
-                });
-                return Object.keys(this.storage);
-                
-            }
-
-            saveChanges() {
-                $.ajax({
-                    url:  this.ajaxHandlerScript, 
-                    type: 'POST', 
-                    cache: false, 
-                    dataType: 'json',
-                    data: { f: 'LOCKGET', n: this.stringName, p: this.updatePassword },
-                    success: this.lockGetReady, 
-                    error: this.errorHandler
-                }
-                );
-            }
-
-            lockGetReady=(callresult) =>{
-                if (callresult.error != undefined)
-                    alert(callresult.error);
-                else {
-                    this.info = this.storage;
-
-                }
-                $.ajax({
-                    url:  this.ajaxHandlerScript,
-                     type: 'POST', 
-                     cache: false, 
-                     dataType: 'json',
-                    data: { f: 'UPDATE', n: this.stringName, v: JSON.stringify(this.info), p: this.updatePassword },
-                    success: this.updateReady, 
-                    error: this.errorHandler
-                }
-                );
-
-            }
-
-            updateReady=(callresult)=> {
-                if (callresult.error != undefined)
-                    alert(callresult.error);
-            }
         }
 
-
         let drinkStorage = new AJAXStorage('MARCHIK_DRINKS_STORAGE');
-        
+
         function getStringValue(message) {
             let value = prompt(`Введите ${message}:`); //спрашиваем 
             while (true) //проверка на корректность
@@ -178,17 +219,7 @@ ${info.r};`)
 
             alert(drinkStorage.getKeys());
         }
-
-
-
     </script>
-
-    <input type="button" value="Ввод информации о напитке" onclick="infoDrink()">
-    <input type="button" value="Получение информации о напитке" onclick="getInfoDrink()">
-    <input type="button" value="Удаление информации о напитке" onclick="deleteInfoDrink()">
-    <input type="button" value="Перечень всех напитков" onclick="listDrink()">
-
-
 </body>
 
 </html>
