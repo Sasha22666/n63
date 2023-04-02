@@ -20,7 +20,7 @@
 
         class AJAXStorage {
 
-            constructor(strName) {
+            constructor(strName, callBackStart, callBackFinish) {
 
                 this.ajaxHandlerScript = "https://fe.it-academy.by/AjaxStringStorage2.php";
                 this.stringName = strName;
@@ -28,7 +28,10 @@
                 this.storage = {};
                 this.updatePassword = Math.random();
 
-                this.setstart();
+                this.setStart=callBackStart;
+                this.setEnd=callBackFinish;
+
+                this.setStart();
                 $.ajax({
                     url: this.ajaxHandlerScript,
                     type: 'POST',
@@ -50,20 +53,6 @@
                 this.setEnd();
             };
 
-            setstart() {
-                document.getElementById("button1").disabled = true;
-                document.getElementById("button2").disabled = true;
-                document.getElementById("button3").disabled = true;
-                document.getElementById("button4").disabled = true;
-            }
-
-            setEnd() {
-                document.getElementById("button1").disabled = false;
-                document.getElementById("button2").disabled = false;
-                document.getElementById("button3").disabled = false;
-                document.getElementById("button4").disabled = false;
-            }
-
             addValue(key, value) {
                 this.storage[key] = value;
                 this.info = this.storage;
@@ -71,7 +60,7 @@
             }
 
             saveChanges() {
-                this.setstart();
+                this.setStart();
                 $.ajax({
                     url: this.ajaxHandlerScript,
                     type: 'POST',
@@ -90,7 +79,8 @@
 
             lockGetReady = (callresult) => {
                 if (callresult.error != undefined)
-                    alert(callresult.error);
+                    {alert(callresult.error);
+                    this.setEnd();}
                 else {
                     this.info = this.storage;
                 }
@@ -119,7 +109,7 @@
             }
 
             getKeys() {
-                this.setstart();
+                this.setStart();
                 $.ajax({
                     url: this.ajaxHandlerScript,
                     type: 'POST',
@@ -161,7 +151,21 @@
             }
         }
 
-        let drinkStorage = new AJAXStorage('MARCHIK_DRINKS_STORAGE');
+        let drinkStorage = new AJAXStorage('MARCHIK_DRINKS_STORAGE', buttonsBlock, buttonsUnblock);
+
+        function buttonsBlock() {
+                document.getElementById("button1").disabled = true;
+                document.getElementById("button2").disabled = true;
+                document.getElementById("button3").disabled = true;
+                document.getElementById("button4").disabled = true;
+            }
+
+        function buttonsUnblock() {
+                document.getElementById("button1").disabled = false;
+                document.getElementById("button2").disabled = false;
+                document.getElementById("button3").disabled = false;
+                document.getElementById("button4").disabled = false;
+            }
 
         function getStringValue(message) {
             let value = prompt(`Введите ${message}:`); //спрашиваем 
